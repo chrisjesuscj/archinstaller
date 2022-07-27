@@ -44,7 +44,7 @@ pacstrap /mnt base linux linux-firmware vim sudo  --noconfirm --needed
 
 # configuring the system
 genfstab -U /mnt >> /mnt/etc/fstab
-arch-chroot /mnt
+arch-chroot /mnt /bin/bash <<"CHROOT"
 ln -sf /usr/share/zoneinfo/America/Sao_Paulo
 hwclock --systohc --utc
 sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
@@ -128,6 +128,7 @@ pacman -S --noconfirm --needed ttf-caladea ttf-carlito ttf-dejavu ttf-liberation
 
 # finishing up
 exit
+CHROOT
 echo "Finished. Reboot now? [Y/n]"
 read answer
 if [[ ! "$answer" =~ ^(n|N) ]]; then
