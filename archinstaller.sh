@@ -22,6 +22,7 @@ read -s password
 
 # install preparations
 timedatectl set-ntp true
+pacman -Sy 
 pacman -S --noconfirm archlinux-keyring
 sed -i "s/^#ParallelDownloads/ParallelDownloads/" /etc/pacman.conf 
 
