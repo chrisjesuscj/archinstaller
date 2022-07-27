@@ -87,7 +87,7 @@ cat << EOF > /boot/loader/loader.conf
 	editor	no
 EOF
 
-/boot/loader/entries/arch.conf
+sed -i 's#^ \+##g' /boot/loader/entries/arch.conf
 sed -i 's#^ \+##g' /boot/loader/loader.conf
 
 # installing graphic drivers
