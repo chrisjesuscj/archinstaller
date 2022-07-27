@@ -22,7 +22,7 @@ read -s password
 
 # install preparations
 timedatectl set-ntp true
-pacman -Sy 
+pacman -Sy --noconfirm
 pacman -S --noconfirm archlinux-keyring
 sed -i "s/^#ParallelDownloads/ParallelDownloads/" /etc/pacman.conf 
 
@@ -54,6 +54,7 @@ locale-gen
 echo "LANG=pt_BR.UTF-8" > /etc/locale.conf
 sed -i '/\[multilib\],/Include/''s/^#//' /etc/pacman.conf
 pacman -Sy --noconfirm
+pacman -S --noconfirm archlinux-keyring
 
 # network configuration
 echo $hostname > /etc/hostname
