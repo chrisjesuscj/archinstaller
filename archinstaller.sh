@@ -45,7 +45,7 @@ pacstrap /mnt base linux linux-firmware vim sudo  --noconfirm --needed
 
 # configuring the system
 genfstab -U /mnt >> /mnt/etc/fstab
-arch-chroot /mnt /bin/bash <<"CHROOT"
+arch-chroot /mnt /bin/bash << CHROOT
 ln -sf /usr/share/zoneinfo/America/Sao_Paulo
 hwclock --systohc --utc
 sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
@@ -66,6 +66,8 @@ echo "%wheel ALL=(ALL:ALL) ALL" | (EDITOR="tee" visudo)
 passwd --lock root
 
 # boot loader configuring
+uuid=$(blkid | grep ${drive}2 | cut -d ' ' -f 3 | cut -d '"' -f 2)
+ptuuid=$(blkid | grep ${drive}2 | cut -d ' ' -f 6 | cut -d '"' -f 2)
 cpu_intel=$(lscpu | grep 'Intel' &> /dev/null && echo 'yes' || echo '')
 
 if [[ -n "$cpu_intel" ]]; then
@@ -74,17 +76,17 @@ fi
 
 bootctl install
 cat << EOF > /boot/loader/entries/arch.conf
-	title	Arch Linux
-	linux	/vmlinuz-linux
-	initrd	/intel-ucode.img
-	initrd	/initramfs-linux.img
-	options	root=${drive}2 rw
+title	Arch Linux
+linux	/vmlinuz-linux
+initrd	/intel-ucode.img
+initrd	/initramfs-linux.img
+options	root=UUID=$uuid rw
 EOF
 
 cat << EOF > /boot/loader/loader.conf
-	default arch
-	timeout 0
-	editor	no
+default arch
+timeout 0
+editor	no
 EOF
 
 sed -i 's#^ \+##g' /boot/loader/entries/arch.conf
@@ -103,31 +105,31 @@ if [[ -n "$amd" ]]; then
 fi
 
 # installing gnome
-pacman -S --noconfirm eog evince file-roller gdm gedit gnome-backgrounds gnome-boxes gnome-calculator \
-		gnome-characters gnome-color-manager gnome-control-center gnome-font-viewer gnome-keyring \
-		gnome-music gnome-session gnome-settings-daemon gnome-shell gnome-system-monitor \
-		gnome-terminal gnome-weather gvfs gvfs-afc gvfs-goa gvfs-google gvfs-gphoto2 gvfs-mtp \
-		gvfs-nfs gvfs-smb mutter nautilus simple-scan sushi xdg-user-dirs-gtk gnome-tweaks \
-		celluloid networkmanager
-
-systemctl enable gdm.service
-systemctl enable NetworkManager.service
-# gsettings set org.gnome.desktop.interface color-scheme prefer-dark
-
-# installing firefox
-pacman -S --noconfirm firefox firefox-i18n-pt-br firefox-ublock-origin
-
-# installing libreoffice
-pacman -S --noconfirm libreoffice-fresh
-
-# installing comunication software
-pacman -S --noconfirm telegram-desktop discord
-
-# installing fonts
-pacman -S --noconfirm --needed ttf-caladea ttf-carlito ttf-dejavu ttf-liberation ttf-linux-libertine-g \
-		noto-fonts adobe-source-code-pro-fonts adobe-source-sans-fonts adobe-source-serif-fonts \
-		ttf-fira-mono ttf-fira-sans
-
+# pacman -S --noconfirm eog evince file-roller gdm gedit gnome-backgrounds gnome-boxes gnome-calculator \
+#  		gnome-characters gnome-color-manager gnome-control-center gnome-font-viewer gnome-keyring \
+#  		gnome-music gnome-session gnome-settings-daemon gnome-shell gnome-system-monitor \
+#  		gnome-terminal gnome-weather gvfs gvfs-afc gvfs-goa gvfs-google gvfs-gphoto2 gvfs-mtp \
+#  		gvfs-nfs gvfs-smb mutter nautilus simple-scan sushi xdg-user-dirs-gtk gnome-tweaks \
+#  		celluloid networkmanager
+# 
+# systemctl enable gdm.service
+# systemctl enable NetworkManager.service
+# # gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+# 
+# # installing firefox
+# pacman -S --noconfirm firefox firefox-i18n-pt-br firefox-ublock-origin
+# 
+# # installing libreoffice
+# pacman -S --noconfirm libreoffice-fresh
+# 
+# # installing comunication software
+# pacman -S --noconfirm telegram-desktop discord
+# 
+# # installing fonts
+# pacman -S --noconfirm --needed ttf-caladea ttf-carlito ttf-dejavu ttf-liberation ttf-linux-libertine-g \
+# 		noto-fonts adobe-source-code-pro-fonts adobe-source-sans-fonts adobe-source-serif-fonts \
+# 		ttf-fira-mono ttf-fira-sans
+# 
 # finishing up
 exit
 CHROOT
