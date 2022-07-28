@@ -46,7 +46,7 @@ pacstrap /mnt base linux linux-firmware vim sudo  --noconfirm --needed
 # configuring the system
 genfstab -U /mnt >> /mnt/etc/fstab
 arch-chroot /mnt /bin/bash << CHROOT
-ln -sf /usr/share/zoneinfo/America/Sao_Paulo
+ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 hwclock --systohc --utc
 sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
 sed -i 's/^#pt_BR.UTF-8/pt_BR.UTF-8/' /etc/locale.gen
@@ -66,13 +66,6 @@ echo "%wheel ALL=(ALL:ALL) ALL" | (EDITOR="tee" visudo)
 passwd --lock root
 
 # boot loader configuring
-uuid=$(blkid | grep ${drive}2 | cut -d ' ' -f 3 | cut -d '"' -f 2)
-ptuuid=$(blkid | grep ${drive}2 | cut -d ' ' -f 6 | cut -d '"' -f 2)
-cpu_intel=$(lscpu | grep 'Intel' &> /dev/null && echo 'yes' || echo '')
-
-if [[ -n "$cpu_intel" ]]; then
-	pacman -S --noconfirm intel-ucode --overwrite=/boot/intel-ucode.img
-fi
 
 bootctl install
 cat << EOF > /boot/loader/entries/arch.conf
@@ -80,7 +73,7 @@ title	Arch Linux
 linux	/vmlinuz-linux
 initrd	/intel-ucode.img
 initrd	/initramfs-linux.img
-options	root=UUID=$uuid rw
+options	root=${drive}2 rw
 EOF
 
 cat << EOF > /boot/loader/loader.conf
@@ -91,6 +84,8 @@ EOF
 
 sed -i 's#^ \+##g' /boot/loader/entries/arch.conf
 sed -i 's#^ \+##g' /boot/loader/loader.conf
+
+pacman -S --noconfirm intel-ucode --overwrite=/boot/intel-ucode.img
 
 # installing graphic drivers
 nvidia=$(lspci | grep -e VGA -e 3D | grep 'NVIDIA' 2> /dev/null || echo '')
